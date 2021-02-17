@@ -1,0 +1,201 @@
+//import net.serenitybdd.builds.ProjectVersionCounter
+/**
+ * To build a release version with the same version number as the serenity core dependency:
+ *   gradle build -PcoreRelease
+ * To build a release with a specific version number, use:
+ *   gradle build -PnextVersion=1.2.3
+ *
+ * To upload a new release to Nexus:
+ *   gradle clean uploadArchives -PcoreRelease
+ *
+ * Requirement environment variables:
+ *   - OSSRHUSERNAME - Nexus username
+ *   - OSSRHPASSWORD - Nexus password
+ */
+
+plugins {
+    // Building
+    id 'java'
+    id 'groovy'
+
+    // Signing
+    id 'signing'
+
+    // Deploying
+    id 'maven'
+    id 'io.codearte.nexus-staging' version '0.22.0'
+
+    id "com.gradle.plugin-publish" version "0.12.0"
+    id "java-gradle-plugin"
+
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+signing {
+    def signingKeyId = findProperty("signingKeyId")
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    sign configurations.archives
+}
+
+ext {
+    projectDescription = 'Serenity Gradle Plugin'
+
+    if (!project.hasProperty("nextVersion")) {
+        if (project.hasProperty("coreRelease")) {
+            ext.nextVersion = "${serenityCoreVersion}"
+        } else {
+            ext.nextVersion = "${serenityCoreVersion}-SNAPSHOT"
+        }
+    }
+}
+
+group = 'net.serenity-bdd'
+archivesBaseName = "serenity-gradle-plugin"
+version = nextVersion
+println "BUILDING VERSION ${nextVersion}"
+
+
+task createNewVersionTag(type: Exec) {
+    executable "sh"
+    args "-c", "git tag -f -a v$nextVersion -m'release tag'"
+}
+
+task pushVersionTag(type: Exec, dependsOn: 'createNewVersionTag') {
+    executable "sh"
+    args "-c", "git push -f origin v$nextVersion"
+}
+
+task tagNewVersion() {
+    dependsOn pushVersionTag
+}
+
+wrapper {
+    gradleVersion = '6.4'
+}
+
+test {
+    include '**/When*'
+    include '**/Cucumber*'
+    include '**/ScenarioLineCount*'
+    exclude '**/*$*'
+    exclude '**/integration/**'
+    exclude '**/samples/**'
+    exclude '**/*Sample*'
+    maxParallelForks = Runtime.runtime.availableProcessors() * 4
+}
+
+
+configurations.all {
+    resolutionStrategy {
+        // fail fast on dependency convergence problems
+        //failOnVersionConflict()
+        force "commons-collections:commons-collections:${commonsCollectionsVersion}",
+                "xml-apis:xml-apis:${xmlApiVersion}",
+                "commons-codec:commons-codec:${commonsCodecVersion}",
+                "com.google.code.gson:gson:${gsonVersion}"
+    }
+}
+
+dependencies {
+    compile("net.serenity-bdd:serenity-core:${serenityCoreVersion}")
+    compile("net.serenity-bdd:serenity-model:${serenityCoreVersion}")
+    compile("net.serenity-bdd:serenity-junit:${serenityCoreVersion}")
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "Serenity Gradle Plugin",
+                   "Implementation-Version": project.version.toString())
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:-options"
+}
+
+// Build, sign, and upload
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            // Sign POM
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            // Destination
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.getenv("OSSRHUSERNAME"), password: System.getenv("OSSRHPASSWORD"))
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: System.getenv("OSSRHUSERNAME"), password: System.getenv("OSSRHPASSWORD"))
+            }
+
+            // Add required metadata to POM
+            pom.project {
+                name 'Serenity BDD Cucumber 6 Integration'
+                packaging 'jar'
+                description 'Run Serenity tests and generate Serenity reports using Cucumber 6'
+                url 'https://github.com/serenity-bdd/serenity-cucumber6'
+
+                scm {
+                    connection 'scm:git:git://github.com/serenity-bdd/serenity-cucumber6.git'
+                    developerConnection 'scm:git:ssh://github.com/serenity-bdd/serenity-cucumber6'
+                    url 'https://github.com/serenity-bdd/serenity-cucumber6/tree/master'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'johnsmart'
+                        name 'John Ferguson Smart'
+                        email 'john.smart@wakaleo.com'
+                    }
+                    developer {
+                        id "cliviu"
+                        name "Liviu Carausu"
+                        email 'liviu.carausu@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+nexusStaging {
+    packageGroup = "net.serenity-bdd"
+    stagingProfileId = "88ab355676248c"
+}
+
+task copyDeps(type: Copy) {
+    from configurations.runtime + configurations.testCompile
+    into project.projectDir.path + "/lib"
+}
