@@ -39,10 +39,13 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 signing {
-    def signingKeyId = findProperty("signingKeyId")
+//    def signingKeyId = findProperty("signing.keyId")
+//    def signingKey = findProperty("signing.secretKeyRingFile")
+//    def signingPassword = findProperty("signing.password")
+//    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
-    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    useInMemoryPgpKeys(signingKey, signingPassword)
     sign configurations.archives
 }
 
