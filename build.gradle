@@ -8,6 +8,9 @@
  * To upload a new release to Nexus:
  *   gradle clean uploadArchives -PcoreRelease
  *
+ * To upload a new release to Gradle portal:
+ *   gradle clean publishPlugins -PcoreRelease -Pgradle.publish.key=<key> -Pgradle.publish.secret=<secret>
+ *
  * Requirement environment variables:
  *   - OSSRHUSERNAME - Nexus username
  *   - OSSRHPASSWORD - Nexus password
@@ -25,9 +28,10 @@ plugins {
     id 'maven'
     id 'io.codearte.nexus-staging' version '0.22.0'
 
-    id "com.gradle.plugin-publish" version "0.12.0"
+    id "com.gradle.plugin-publish" version "0.14.0"
     id "java-gradle-plugin"
 
+    id "maven-publish"
 }
 
 repositories {
@@ -85,7 +89,7 @@ task tagNewVersion() {
 }
 
 wrapper {
-    gradleVersion = '6.4'
+    gradleVersion = '6.8.3'
 }
 
 test {
@@ -205,3 +209,21 @@ task copyDeps(type: Copy) {
     from configurations.runtime + configurations.testCompile
     into project.projectDir.path + "/lib"
 }
+
+gradlePlugin {
+    plugins {
+        serenityPlugin {
+            id = 'net.serenity-bdd.gradle'
+            displayName = 'Serenity BDD Cucumber 6 Integration'
+            description = 'Run Serenity tests and generate Serenity reports using Cucumber 6'
+            implementationClass = 'net.serenitybdd.plugins.gradle.SerenityPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/serenity-bdd/serenity-gradle-plugin'
+    vcsUrl = 'https://github.com/serenity-bdd/serenity-gradle-plugin.git'
+    tags = ['cucumber', 'serenity', 'tests', 'reporting', 'livingdocumentation']
+}
+
