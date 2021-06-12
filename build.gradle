@@ -220,8 +220,8 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = 'http://www.gradle.org/'
-    vcsUrl = 'https://github.com/gradle/gradle'
+    website = 'https://www.serenity-bdd.info/'
+    vcsUrl = 'https://github.com/serenity-bdd/serenity-gradle-plugin'
     description = 'Serenity Gradle Plugin'
     tags = ['serenity-bdd', 'test-automation']
 
