@@ -2,22 +2,22 @@ package net.serenitybdd.plugins.gradle
 
 import net.serenitybdd.core.history.FileSystemTestOutcomeSummaryRecorder
 import net.thucydides.core.ThucydidesSystemProperty
+import net.thucydides.core.configuration.SystemPropertiesConfiguration
 import net.thucydides.core.guice.Injectors
 import net.thucydides.core.reports.ExtendedReport
 import net.thucydides.core.reports.ExtendedReports
 import net.thucydides.core.reports.ResultChecker
 import net.thucydides.core.reports.html.HtmlAggregateStoryReporter
 import net.thucydides.core.webdriver.Configuration
-import net.thucydides.core.configuration.SystemPropertiesConfiguration
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class SerenityPlugin implements Plugin<Project> {
 
@@ -141,15 +141,17 @@ class SerenityPlugin implements Plugin<Project> {
             }
         }
 
-        project.tasks.aggregate.mustRunAfter project.tasks.test
         project.tasks.checkOutcomes.mustRunAfter project.tasks.aggregate
 
-        project.tasks.clean {
-            it.dependsOn 'clearReports'
-        }
-        project.tasks.check {
-            it.dependsOn 'checkOutcomes'
-        }
+        // TODO: These bits no longer works in recent versions of Gradle, not sure why.
+//        project.tasks.aggregate.mustRunAfter project.tasks.test
+//
+//        project.tasks.clean {
+//            it.dependsOn 'clearReports'
+//        }
+//        project.tasks.check {
+//            it.dependsOn 'checkOutcomes'
+//        }
     }
 
     static Path absolutePathOf(Path path) {
