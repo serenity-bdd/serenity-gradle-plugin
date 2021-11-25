@@ -55,7 +55,7 @@ class SerenityPlugin implements Plugin<Project> {
                 if (project.serenity.generateOutcomes) {
                     reporter.setGenerateTestOutcomeReports();
                 }
-                reporter.generateReportsForTestResultsFrom(reportDirectory.toFile())
+                reporter.generateReportsForTestResultsFrom(reporter.outputDirectory)
                 new ResultChecker(reporter.outputDirectory).checkTestResults();
             }
         }
@@ -84,6 +84,8 @@ class SerenityPlugin implements Plugin<Project> {
                         logger.lifecycle("  - ${report.description}: ${reportPath}")
                     }
                 }
+
+                ResultChecker resultChecker = new ResultChecker(report.ou)
             }
         }
 
