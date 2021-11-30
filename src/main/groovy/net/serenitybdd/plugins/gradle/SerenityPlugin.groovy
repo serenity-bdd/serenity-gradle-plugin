@@ -38,15 +38,17 @@ class SerenityPlugin implements Plugin<Project> {
                     project.serenity.projectKey = project.name
                 }
                 logger.lifecycle("Generating Serenity Reports for ${project.serenity.projectKey} to directory ${reportDirectory.toUri()}")
-                System.properties['serenity.project.key'] = project.serenity.projectKey
+                URI mainReportPath = absolutePathOf(reportDirectory.resolve("index.html")).toUri()
+                logger.lifecycle("  - Main report: $mainReportPath")
 
+                System.properties['serenity.project.key'] = project.serenity.projectKey
                 if (project.serenity.requirementsBaseDir) {
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
                 def reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey)
 
                 reporter.outputDirectory = reportDirectory.toFile()
-
+                reporter.testRoot = project.serenity.testRoot
                 reporter.projectDirectory = project.projectDir.absolutePath
                 reporter.issueTrackerUrl = project.serenity.issueTrackerUrl
                 reporter.jiraUrl = project.serenity.jiraUrl
@@ -69,12 +71,12 @@ class SerenityPlugin implements Plugin<Project> {
                 if (!project.serenity.projectKey) {
                     project.serenity.projectKey = project.name
                 }
-                logger.lifecycle("Generating Serenity Reports for ${project.serenity.projectKey} to directory $reportDirectory")
+
+                logger.lifecycle("Generating Additional Serenity Reports for ${project.serenity.projectKey} to directory $reportDirectory")
                 System.properties['serenity.project.key'] = project.serenity.projectKey
                 if (project.serenity.requirementsBaseDir) {
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
-
                 List<String> extendedReportTypes = project.serenity.reports
                 if (extendedReportTypes) {
                     for (ExtendedReport report : ExtendedReports.named(extendedReportTypes)) {
@@ -85,7 +87,8 @@ class SerenityPlugin implements Plugin<Project> {
                     }
                 }
 
-                ResultChecker resultChecker = new ResultChecker(report.ou)
+                ResultChecker resultChecker = new ResultChecker(reportDirectory.toFile())
+                resultChecker.checkTestResults()
             }
         }
 
