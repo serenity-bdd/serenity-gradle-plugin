@@ -8,6 +8,7 @@ import net.thucydides.core.reports.ExtendedReport
 import net.thucydides.core.reports.ExtendedReports
 import net.thucydides.core.reports.ResultChecker
 import net.thucydides.core.reports.html.HtmlAggregateStoryReporter
+import net.thucydides.core.requirements.DefaultRequirements
 import net.thucydides.core.webdriver.Configuration
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
@@ -37,7 +38,11 @@ class SerenityPlugin implements Plugin<Project> {
                 if (!project.serenity.projectKey) {
                     project.serenity.projectKey = project.name
                 }
-                logger.lifecycle("Generating Serenity Reports for ${project.serenity.projectKey} to directory ${reportDirectory.toUri()}")
+                logger.lifecycle("Generating Serenity Reports")
+                if (project.serenity.testRoot) {
+                    logger.lifecycle("  - Test Root: ${project.serenity.testRoot}")
+                    System.properties['serenity.test.root'] = project.serenity.testRoot
+                }
                 URI mainReportPath = absolutePathOf(reportDirectory.resolve("index.html")).toUri()
                 logger.lifecycle("  - Main report: $mainReportPath")
 
@@ -45,7 +50,8 @@ class SerenityPlugin implements Plugin<Project> {
                 if (project.serenity.requirementsBaseDir) {
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
-                def reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey)
+                def requirements = new DefaultRequirements(project.serenity.testRoot)
+                def reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
 
                 reporter.outputDirectory = reportDirectory.toFile()
                 reporter.testRoot = project.serenity.testRoot
@@ -74,7 +80,12 @@ class SerenityPlugin implements Plugin<Project> {
 
                 logger.lifecycle("Generating Additional Serenity Reports for ${project.serenity.projectKey} to directory $reportDirectory")
                 System.properties['serenity.project.key'] = project.serenity.projectKey
+                if (project.serenity.testRoot) {
+                    logger.lifecycle("  - Test Root: ${project.serenity.testRoot}")
+                    System.properties['serenity.test.root'] = project.serenity.testRoot
+                }
                 if (project.serenity.requirementsBaseDir) {
+                    logger.lifecycle("  - Requirements base director: ${project.serenity.requirementsBaseDir}")
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
                 List<String> extendedReportTypes = project.serenity.reports
