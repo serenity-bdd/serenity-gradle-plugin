@@ -31,9 +31,7 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://oss.sonatype.org/content/groups/public/"
-    }
+    mavenLocal()
 }
 
 sourceCompatibility = 1.8
@@ -112,20 +110,6 @@ configurations.all {
     }
 }
 
-configurations {
-    implementation {
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-java')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-remote')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-support')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-remote-driver')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-chrome-driver')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-firefox-driver')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-edge-driver')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-ie-driver')
-        exclude(group: 'org.seleniumhq.selenium', module: 'selenium-api')
-        exclude(group: 'io.appium', module: 'java-client')
-    }
-}
 dependencies {
     implementation("net.serenity-bdd:serenity-core:${serenityCoreVersion}")
     implementation("net.serenity-bdd:serenity-model:${serenityCoreVersion}")
@@ -158,6 +142,72 @@ artifacts {
 tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:-options"
 }
+
+//mavenPublish {
+//    useMavenPublish = true
+//}
+
+// Build, sign, and upload
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            // Sign POM
+//            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+//
+//            // Destination
+//            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//                authentication(userName: System.getenv("OSSRHUSERNAME"), password: System.getenv("OSSRHPASSWORD"))
+//            }
+//            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+//                authentication(userName: System.getenv("OSSRHUSERNAME"), password: System.getenv("OSSRHPASSWORD"))
+//            }
+//
+//            // Add required metadata to POM
+//            pom.project {
+//                name 'Serenity BDD Cucumber 6 Integration'
+//                packaging 'jar'
+//                description 'Run Serenity tests and generate Serenity reports using Cucumber 6'
+//                url 'https://github.com/serenity-bdd/serenity-cucumber6'
+//
+//                scm {
+//                    connection 'scm:git:git://github.com/serenity-bdd/serenity-cucumber6.git'
+//                    developerConnection 'scm:git:ssh://github.com/serenity-bdd/serenity-cucumber6'
+//                    url 'https://github.com/serenity-bdd/serenity-cucumber6/tree/master'
+//                }
+//
+//                licenses {
+//                    license {
+//                        name 'The Apache License, Version 2.0'
+//                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                    }
+//                }
+//
+//                developers {
+//                    developer {
+//                        id 'johnsmart'
+//                        name 'John Ferguson Smart'
+//                        email 'john.smart@wakaleo.com'
+//                    }
+//                    developer {
+//                        id "cliviu"
+//                        name "Liviu Carausu"
+//                        email 'liviu.carausu@gmail.com'
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+
+//nexusStaging {
+//    packageGroup = "net.serenity-bdd"
+//    stagingProfileId = "88ab355676248c"
+//}
+
+//task copyDeps(type: Copy) {
+//    from configurations.runtime + configurations.testCompile
+//    into project.projectDir.path + "/lib"
+//}
 
 
 gradlePlugin {
