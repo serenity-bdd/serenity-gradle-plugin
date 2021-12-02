@@ -50,9 +50,13 @@ class SerenityPlugin implements Plugin<Project> {
                 if (project.serenity.requirementsBaseDir) {
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
-                def requirements = new DefaultRequirements(project.serenity.testRoot)
-                def reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
-
+                def reporter
+                if (project.serenity.testRoot != null) {
+                    def requirements = new DefaultRequirements(project.serenity.testRoot)
+                    reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
+                } else {
+                    reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey)
+                }
                 reporter.outputDirectory = reportDirectory.toFile()
                 reporter.testRoot = project.serenity.testRoot
                 reporter.projectDirectory = project.projectDir.absolutePath
