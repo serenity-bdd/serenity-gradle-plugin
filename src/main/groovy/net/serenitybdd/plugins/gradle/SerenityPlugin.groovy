@@ -50,6 +50,11 @@ class SerenityPlugin implements Plugin<Project> {
                 if (project.serenity.requirementsBaseDir) {
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
+                if (project.serenity.requirementsDir) {
+                    SystemPropertiesConfiguration configuration = (SystemPropertiesConfiguration) Injectors.getInjector().getProvider(Configuration.class).get()
+                    configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', project.serenity.requirementsDir)
+                }
+
                 def reporter
                 if (project.serenity.testRoot != null) {
                     def requirements = new DefaultRequirements(project.serenity.testRoot)
