@@ -39,6 +39,8 @@ class SerenityPlugin implements Plugin<Project> {
                     project.serenity.projectKey = project.name
                 }
                 logger.lifecycle("Generating Serenity Reports")
+                String testRoot = project.serenity.testRoot
+
                 if (project.serenity.testRoot) {
                     logger.lifecycle("  - Test Root: ${project.serenity.testRoot}")
                     System.properties['serenity.test.root'] = project.serenity.testRoot
@@ -50,18 +52,17 @@ class SerenityPlugin implements Plugin<Project> {
                 if (project.serenity.requirementsBaseDir) {
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
+                println("project.serenity.requirementsDir: ${project.serenity.requirementsDir}")
                 if (project.serenity.requirementsDir) {
                     SystemPropertiesConfiguration configuration = (SystemPropertiesConfiguration) Injectors.getInjector().getProvider(Configuration.class).get()
                     configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', project.serenity.requirementsDir)
                 }
 
                 def reporter
-                if (project.serenity.testRoot != null) {
-                    def requirements = new DefaultRequirements(project.serenity.testRoot)
-                    reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
-                } else {
-                    reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey)
-                }
+
+                def requirements = (project.serenity.testRoot) ? new DefaultRequirements(project.serenity.testRoot) : new DefaultRequirements()
+
+                reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
                 reporter.outputDirectory = reportDirectory.toFile()
                 reporter.testRoot = project.serenity.testRoot
                 reporter.projectDirectory = project.projectDir.absolutePath
