@@ -47,12 +47,13 @@ class SerenityPlugin implements Plugin<Project> {
                 }
                 URI mainReportPath = absolutePathOf(reportDirectory.resolve("index.html")).toUri()
                 logger.lifecycle("  - Main report: $mainReportPath")
+                logger.lifecycle("      - Test Root: ${project.serenity.testRoot}")
+                logger.lifecycle("      - Requirements base directory: ${project.serenity.requirementsBaseDir}")
 
                 System.properties['serenity.project.key'] = project.serenity.projectKey
                 if (project.serenity.requirementsBaseDir) {
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
-                println("project.serenity.requirementsDir: ${project.serenity.requirementsDir}")
                 if (project.serenity.requirementsDir) {
                     SystemPropertiesConfiguration configuration = (SystemPropertiesConfiguration) Injectors.getInjector().getProvider(Configuration.class).get()
                     configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', project.serenity.requirementsDir)
@@ -91,11 +92,9 @@ class SerenityPlugin implements Plugin<Project> {
                 logger.lifecycle("Generating Additional Serenity Reports for ${project.serenity.projectKey} to directory $reportDirectory")
                 System.properties['serenity.project.key'] = project.serenity.projectKey
                 if (project.serenity.testRoot) {
-                    logger.lifecycle("  - Test Root: ${project.serenity.testRoot}")
                     System.properties['serenity.test.root'] = project.serenity.testRoot
                 }
                 if (project.serenity.requirementsBaseDir) {
-                    logger.lifecycle("  - Requirements base director: ${project.serenity.requirementsBaseDir}")
                     System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
                 }
                 List<String> extendedReportTypes = project.serenity.reports
