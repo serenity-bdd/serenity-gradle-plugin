@@ -13,6 +13,7 @@ import net.thucydides.core.webdriver.Configuration
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -27,6 +28,7 @@ class SerenityPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         updateSystemPath(project)
+        project.getPluginManager().apply(JavaPlugin.class)
         project.extensions.create("serenity", SerenityPluginExtension)
         project.task('aggregate') {
             group = 'Serenity BDD'
@@ -168,15 +170,16 @@ class SerenityPlugin implements Plugin<Project> {
 
         project.tasks.checkOutcomes.mustRunAfter project.tasks.aggregate
 
-        // TODO: These bits no longer works in recent versions of Gradle, not sure why.
-//        project.tasks.aggregate.mustRunAfter project.tasks.test
-//
-//        project.tasks.clean {
-//            it.dependsOn 'clearReports'
-//        }
-//        project.tasks.check {
-//            it.dependsOn 'checkOutcomes'
-//        }
+        project.tasks.test {
+            it.finalizedBy 'aggregate'
+        }
+
+        project.tasks.clean {
+            it.dependsOn 'clearReports'
+        }
+        project.tasks.check {
+            it.dependsOn 'checkOutcomes'
+        }
     }
 
     static Path absolutePathOf(Path path) {
