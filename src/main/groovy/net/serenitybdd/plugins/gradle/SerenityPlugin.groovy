@@ -28,9 +28,10 @@ class SerenityPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         updateSystemPath(project)
-        project.getPluginManager().apply(JavaPlugin.class)
+        project.pluginManager.apply(JavaPlugin.class)
         project.extensions.create("serenity", SerenityPluginExtension)
-        project.task('aggregate') {
+
+        def aggregateTask = project.tasks.register('aggregate') {
             group = 'Serenity BDD'
             description = 'Generates aggregated Serenity reports'
             doLast {
@@ -81,7 +82,7 @@ class SerenityPlugin implements Plugin<Project> {
             }
         }
 
-        project.task('reports') {
+        def reportsTask = project.tasks.register('reports') {
             group = 'Serenity BDD'
             description = 'Generates extended Serenity reports'
             doLast {
@@ -114,7 +115,7 @@ class SerenityPlugin implements Plugin<Project> {
             }
         }
 
-        project.task('checkOutcomes') {
+        def checkOutcomesTask = project.tasks.register('checkOutcomes') {
             group = 'Serenity BDD'
             description = "Checks the Serenity reports and fails the build if there are test failures (run automatically with 'check')"
 
@@ -131,7 +132,8 @@ class SerenityPlugin implements Plugin<Project> {
                 }
             }
         }
-        project.task('clearReports') {
+
+        def clearReportsTask = project.tasks.register('clearReports') {
             group = 'Serenity BDD'
             description = "Deletes the Serenity output directory (run automatically with 'clean')"
 
@@ -142,7 +144,7 @@ class SerenityPlugin implements Plugin<Project> {
             }
         }
 
-        project.task('clearHistory') {
+        def clearHistoryTask = project.tasks.register('clearHistory') {
             group = 'Serenity BDD'
             description = "Deletes the Serenity history directory"
 
@@ -153,7 +155,7 @@ class SerenityPlugin implements Plugin<Project> {
             }
         }
 
-        project.task('history') {
+        def historyTask = project.tasks.register('history') {
             group = 'Serenity BDD'
             description = "Records a summary of test outcomes to be used for comparison in the next test run"
 
@@ -168,17 +170,20 @@ class SerenityPlugin implements Plugin<Project> {
             }
         }
 
-        project.tasks.checkOutcomes.mustRunAfter project.tasks.aggregate
-
-        project.tasks.test {
-            it.finalizedBy 'aggregate'
+        project.tasks.named('checkOutcomes').configure {
+            mustRunAfter aggregateTask
         }
 
-        project.tasks.clean {
-            it.dependsOn 'clearReports'
+        project.tasks.named('test').configure {
+            finalizedBy aggregateTask
         }
-        project.tasks.check {
-            it.dependsOn 'checkOutcomes'
+
+        project.tasks.named('clean').configure {
+            dependsOn clearReportsTask
+        }
+
+        project.tasks.named('check').configure {
+            dependsOn checkOutcomesTask
         }
     }
 
