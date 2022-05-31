@@ -14,7 +14,7 @@ class AggregateTask extends SerenityAbstractTask {
     @TaskAction
     void aggregate() {
         updateProperties(project)
-        Path reportDirectory = SerenityAbstractTask.prepareReportDirectory(project)
+        Path reportDirectory = prepareReportDirectory(project)
 
         if (!project.serenity.projectKey) {
             project.serenity.projectKey = project.name
@@ -40,11 +40,9 @@ class AggregateTask extends SerenityAbstractTask {
             configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', project.serenity.requirementsDir)
         }
 
-        def reporter
+        DefaultRequirements requirements = testRoot ? new DefaultRequirements(testRoot) : new DefaultRequirements()
+        HtmlAggregateStoryReporter reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
 
-        def requirements = (project.serenity.testRoot) ? new DefaultRequirements(project.serenity.testRoot) : new DefaultRequirements()
-
-        reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
         reporter.outputDirectory = reportDirectory.toFile()
         reporter.testRoot = project.serenity.testRoot
         reporter.projectDirectory = project.projectDir.absolutePath
@@ -56,6 +54,6 @@ class AggregateTask extends SerenityAbstractTask {
             reporter.setGenerateTestOutcomeReports();
         }
         reporter.generateReportsForTestResultsFrom(reporter.outputDirectory)
-        new ResultChecker(reporter.outputDirectory).checkTestResults();
+        new ResultChecker(reporter.outputDirectory).checkTestResults()
     }
 }

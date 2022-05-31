@@ -1,5 +1,7 @@
 package net.serenitybdd.plugins.gradle
 
+
+import net.thucydides.core.guice.Injectors
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
@@ -8,6 +10,8 @@ class SerenityPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        Injectors.setDefaultModule(new SerenityPluginModule())
+
         SerenityAbstractTask.updateSystemPath(project)
         project.pluginManager.apply(JavaPlugin.class)
         project.extensions.create("serenity", SerenityPluginExtension)
