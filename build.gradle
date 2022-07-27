@@ -14,8 +14,10 @@
  */
 
 plugins {
-    id "com.gradle.plugin-publish" version "0.15.0"
-    id "java-gradle-plugin"
+    /// XXX - 2022-05-10: id 'com.gradle.plugin-publish' version '1.0.0-rc-1' requires changes
+    // not documented yet. See https://github.com/gradle/gradle/issues/20718
+    id 'com.gradle.plugin-publish' version '0.21.0'
+    id 'java-gradle-plugin'
 
     // Building
     id 'java'
@@ -26,15 +28,17 @@ plugins {
     id 'signing'
 
     // Deploying
-    id 'io.codearte.nexus-staging' version '0.22.0'
+    id 'io.codearte.nexus-staging' version '0.30.0'
 }
 
 repositories {
     mavenCentral()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 //signing {
 //    def signingKey = findProperty("signingKey")
@@ -83,7 +87,8 @@ task tagNewVersion() {
 }
 
 wrapper {
-    gradleVersion = '7.0.2'
+    gradleVersion = '7.4.2'
+    distributionType = 'all'
 }
 
 test {
