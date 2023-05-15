@@ -43,6 +43,11 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+compileTestJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 //signing {
 //    def signingKey = findProperty("signingKey")
 //    def signingPassword = findProperty("signingPassword")
@@ -103,6 +108,7 @@ test {
     exclude '**/samples/**'
     exclude '**/*Sample*'
     maxParallelForks = Runtime.runtime.availableProcessors() * 4
+    useJUnitPlatform {}
 }
 
 
@@ -121,6 +127,10 @@ dependencies {
     implementation("net.serenity-bdd:serenity-core:${serenityCoreVersion}")
     implementation("net.serenity-bdd:serenity-model:${serenityCoreVersion}")
     implementation("net.serenity-bdd:serenity-junit:${serenityCoreVersion}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 }
 
 jar {

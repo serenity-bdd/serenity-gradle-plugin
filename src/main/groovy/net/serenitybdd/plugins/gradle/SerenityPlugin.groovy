@@ -1,45 +1,97 @@
 package net.serenitybdd.plugins.gradle
 
+import net.serenitybdd.core.di.SerenityInfrastructure
+import net.serenitybdd.model.di.ModelInfrastructure
+import net.thucydides.model.ThucydidesSystemProperty
+import net.thucydides.model.configuration.SystemPropertiesConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.plugins.JavaPlugin
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 class SerenityPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        SerenityAbstractTask.updateSystemPath(project)
         project.pluginManager.apply(JavaPlugin.class)
-        project.extensions.create("serenity", SerenityPluginExtension)
+        def layout = project.layout
+        updateReportDirectory(layout)
+        def extension = project.extensions.create("serenity", SerenityPluginExtension)
 
         def aggregate = project.tasks.register('aggregate', AggregateTask) {
             group = 'Serenity BDD'
             description = 'Generates aggregated Serenity reports'
+
+            projectKey = extension.projectKey ?: project.name
+            reportDirectory = getReportDirectory(layout, extension)
+            testRoot = extension.testRoot
+            requirementsBaseDir = extension.requirementsBaseDir
+            requirementsDir = extension.requirementsDir
+            issueTrackerUrl = extension.issueTrackerUrl
+            jiraUrl = extension.jiraUrl
+            jiraProject = extension.jiraProject
+            generateOutcomes = extension.generateOutcomes
+
+            outputs.cacheIf( { false })
         }
 
-        def reports = project.tasks.register('reports', ReportTask) {
+        project.tasks.register('reports', ReportTask) {
             group = 'Serenity BDD'
             description = 'Generates extended Serenity reports'
+
+            projectKey = extension.projectKey ?: project.name
+            reportDirectory = getReportDirectory(layout, extension)
+            testRoot = extension.testRoot
+            reports = extension.reports
         }
 
         def checkOutcomes = project.tasks.register('checkOutcomes', CheckOutcomesTask) {
             group = 'Serenity BDD'
             description = "Checks the Serenity reports and fails the build if there are test failures (run automatically with 'check')"
+
+            def extensionReportDirectory = getReportDirectory(layout, extension)
+            reportDirectory = extensionReportDirectory
+            projectKey = extension.projectKey ?: project.name
+
+            onlyIf { Files.exists(extensionReportDirectory) }
         }
 
         def clearReports = project.tasks.register('clearReports', ClearReportsTask) {
             group = 'Serenity BDD'
             description = "Deletes the Serenity output directory (run automatically with 'clean')"
+
+            def extensionReportDirectory = getReportDirectory(layout, extension)
+
+            reportDirectory = extensionReportDirectory
+
+            onlyIf { Files.exists(extensionReportDirectory) }
         }
 
-        def clearHistory = project.tasks.register('clearHistory', ClearHistoryTask) {
+        project.tasks.register('clearHistory', ClearHistoryTask) {
             group = 'Serenity BDD'
             description = "Deletes the Serenity history directory"
+
+            def extensionHistoryDirectory = getHistoryDirectory(layout, extension)
+
+            historyDirectory = extensionHistoryDirectory
+
+            onlyIf { Files.exists(extensionHistoryDirectory) }
         }
 
-        def history = project.tasks.register('history', HistoryTask) {
+        project.tasks.register('history', HistoryTask) {
             group = 'Serenity BDD'
             description = "Records a summary of test outcomes to be used for comparison in the next test run"
+
+            def extensionSourceDirectory = getSourceDirectory(layout, extension)
+
+            historyDirectory = getHistoryDirectory(layout, extension)
+            sourceDirectory = extensionSourceDirectory
+            deletePreviousHistory = deletePreviousHistory()
+
+            onlyIf { Files.exists(extensionSourceDirectory) }
         }
 
         project.tasks.named('checkOutcomes').configure {
@@ -58,4 +110,35 @@ class SerenityPlugin implements Plugin<Project> {
             dependsOn checkOutcomes
         }
     }
+
+    static void updateReportDirectory(ProjectLayout layout) {
+        // Set the project directory for use in the reporting tasks
+        ModelInfrastructure.configuration.setProjectDirectory(layout.getProjectDirectory().getAsFile().toPath())
+    }
+
+    static Path getHistoryDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
+        return toAbsolute(new File(extension.historyDirectory), layout)
+    }
+
+    static Path getReportDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
+        return toAbsolute(new File(extension.outputDirectory), layout)
+    }
+
+    static Path getSourceDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
+        return toAbsolute(new File(extension.outputDirectory), layout)
+    }
+
+    static Path toAbsolute(File file, ProjectLayout layout) {
+        Path path = file.toPath()
+        if (!path.isAbsolute()) {
+            return layout.projectDirectory.dir(file.toString()).asFile.toPath()
+        }
+        return path
+    }
+
+    static Boolean deletePreviousHistory() {
+        SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
+        return ThucydidesSystemProperty.DELETE_HISTORY_DIRECTORY.booleanFrom(configuration.environmentVariables, true);
+    }
+
 }
