@@ -52,9 +52,7 @@ class AggregateTask extends SerenityAbstractTask {
         reporter.jiraUrl = project.serenity.jiraUrl
         reporter.jiraProject = project.serenity.jiraProject
 
-        if (project.serenity.generateOutcomes) {
-            reporter.setGenerateTestOutcomeReports();
-        }
+        reporter.setGenerateTestOutcomeReports();
         reporter.generateReportsForTestResultsFrom(reporter.outputDirectory)
         new ResultChecker(reporter.outputDirectory).checkTestResults();
     }
