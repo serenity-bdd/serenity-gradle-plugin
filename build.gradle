@@ -77,12 +77,13 @@ task createNewVersionTag(type: Exec) {
     args "-c", "git tag -f -a v$nextVersion -m'release tag'"
 }
 
-task pushVersionTag(type: Exec, dependsOn: 'createNewVersionTag') {
+tasks.register('pushVersionTag', Exec) {
+    dependsOn 'createNewVersionTag'
     executable "sh"
     args "-c", "git push -f origin v$nextVersion"
 }
 
-task tagNewVersion() {
+tasks.register('tagNewVersion') {
     dependsOn pushVersionTag
 }
 
@@ -103,7 +104,7 @@ test {
 }
 
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy {
         // fail fast on dependency convergence problems
         //failOnVersionConflict()
@@ -127,13 +128,13 @@ jar {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
     from sourceSets.main.allSource
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
     from javadoc.destinationDir
 }
 
@@ -143,7 +144,7 @@ artifacts {
     archives sourcesJar, javadocJar
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-Xlint:-options"
 }
 
