@@ -1,10 +1,9 @@
 package net.serenitybdd.plugins.gradle
 
-import net.thucydides.core.guice.Injectors
-import net.thucydides.core.webdriver.Configuration;
+import net.serenitybdd.core.di.SerenityInfrastructure;
 
 class SerenityPluginExtension {
-    private final def configuration = Injectors.getInjector().getProvider(Configuration.class).get()
+    private final def configuration = SerenityInfrastructure.getConfiguration()
     String outputDirectory = configuration.getOutputDirectory()
     String historyDirectory = configuration.getHistoryDirectory()
     String projectKey

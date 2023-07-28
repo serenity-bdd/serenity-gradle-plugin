@@ -1,11 +1,10 @@
 package net.serenitybdd.plugins.gradle
 
 import net.thucydides.core.configuration.SystemPropertiesConfiguration
-import net.thucydides.core.guice.Injectors
 import net.thucydides.core.reports.ResultChecker
 import net.thucydides.core.reports.html.HtmlAggregateStoryReporter
 import net.thucydides.core.requirements.DefaultRequirements
-import net.thucydides.core.webdriver.Configuration
+import net.serenitybdd.core.di.SerenityInfrastructure;
 import org.gradle.api.tasks.TaskAction
 
 import java.nio.file.Path
@@ -36,7 +35,8 @@ class AggregateTask extends SerenityAbstractTask {
             System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
         }
         if (project.serenity.requirementsDir) {
-            SystemPropertiesConfiguration configuration = (SystemPropertiesConfiguration) Injectors.getInjector().getProvider(Configuration.class).get()
+
+            SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
             configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', project.serenity.requirementsDir)
         }
 
