@@ -2,7 +2,7 @@ package net.serenitybdd.plugins.gradle
 
 import net.thucydides.core.reports.ExtendedReport
 import net.thucydides.core.reports.ExtendedReports
-import net.thucydides.core.reports.ResultChecker
+import net.thucydides.model.reports.ResultChecker
 import org.gradle.api.tasks.TaskAction
 
 class ReportTask extends SerenityAbstractTask {

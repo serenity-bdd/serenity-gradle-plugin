@@ -1,9 +1,8 @@
 package net.serenitybdd.plugins.gradle
 
-import net.thucydides.core.ThucydidesSystemProperty
-import net.thucydides.core.configuration.SystemPropertiesConfiguration
-import net.serenitybdd.core.di.SerenityInfrastructure;
-import net.thucydides.core.webdriver.Configuration
+import net.serenitybdd.core.di.SerenityInfrastructure
+import net.thucydides.model.ThucydidesSystemProperty
+import net.thucydides.model.configuration.SystemPropertiesConfiguration;
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 

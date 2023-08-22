@@ -1,8 +1,7 @@
 package net.serenitybdd.plugins.gradle
 
-import net.thucydides.core.reports.ResultChecker
+import net.thucydides.model.reports.ResultChecker
 import org.gradle.api.file.FileCollection
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 

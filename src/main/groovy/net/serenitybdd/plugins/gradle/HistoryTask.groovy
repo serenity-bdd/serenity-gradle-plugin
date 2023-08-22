@@ -1,6 +1,6 @@
 package net.serenitybdd.plugins.gradle
 
-import net.serenitybdd.core.history.FileSystemTestOutcomeSummaryRecorder
+import net.serenitybdd.model.history.FileSystemTestOutcomeSummaryRecorder
 import org.gradle.api.tasks.TaskAction
 
 class HistoryTask extends SerenityAbstractTask {

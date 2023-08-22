@@ -1,10 +1,10 @@
 package net.serenitybdd.plugins.gradle
 
-import net.thucydides.core.configuration.SystemPropertiesConfiguration
-import net.thucydides.core.reports.ResultChecker
 import net.thucydides.core.reports.html.HtmlAggregateStoryReporter
-import net.thucydides.core.requirements.DefaultRequirements
-import net.serenitybdd.core.di.SerenityInfrastructure;
+import net.serenitybdd.core.di.SerenityInfrastructure
+import net.thucydides.model.configuration.SystemPropertiesConfiguration
+import net.thucydides.model.reports.ResultChecker
+import net.thucydides.model.requirements.DefaultRequirements;
 import org.gradle.api.tasks.TaskAction
 
 import java.nio.file.Path
