@@ -1,5 +1,6 @@
 package net.serenitybdd.plugins.gradle
 
+import net.serenitybdd.model.di.ModelInfrastructure
 import net.thucydides.core.reports.html.HtmlAggregateStoryReporter
 import net.serenitybdd.core.di.SerenityInfrastructure
 import net.thucydides.model.configuration.SystemPropertiesConfiguration
@@ -43,6 +44,9 @@ class AggregateTask extends SerenityAbstractTask {
         def reporter
 
         def requirements = (project.serenity.testRoot) ? new DefaultRequirements(project.serenity.testRoot) : new DefaultRequirements()
+
+        // Set the project directory for use in the reporting tasks
+        ModelInfrastructure.configuration.setProjectDirectory(project.projectDir.toPath())
 
         reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
         reporter.outputDirectory = reportDirectory.toFile()
