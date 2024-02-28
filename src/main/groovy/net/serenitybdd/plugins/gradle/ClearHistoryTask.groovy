@@ -1,15 +1,25 @@
 package net.serenitybdd.plugins.gradle
 
+import org.apache.commons.io.FileUtils
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
-import java.nio.file.Files
+import javax.inject.Inject
+import java.nio.file.Path
 
 class ClearHistoryTask extends SerenityAbstractTask {
 
+    @OutputDirectory
+    abstract Path historyDirectory;
+
+    @Inject
+    ClearHistoryTask(ProjectLayout layout) {
+        super(layout)
+    }
+
     @TaskAction
     void clearHistory() {
-        SerenityAbstractTask.updateProperties(project)
-        def historyDirectory = SerenityAbstractTask.prepareHistoryDirectory(project)
-        Files.delete(historyDirectory)
+        FileUtils.deleteDirectory(historyDirectory.toFile())
     }
 }
