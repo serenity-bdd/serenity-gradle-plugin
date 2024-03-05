@@ -38,7 +38,7 @@ class SerenityPlugin implements Plugin<Project> {
             outputs.cacheIf( { false })
         }
 
-        project.tasks.register('reports', ReportTask) {
+        def reports = project.tasks.register('reports', ReportTask) {
             group = 'Serenity BDD'
             description = 'Generates extended Serenity reports'
 
@@ -70,7 +70,7 @@ class SerenityPlugin implements Plugin<Project> {
             onlyIf { Files.exists(extensionReportDirectory) }
         }
 
-        project.tasks.register('clearHistory', ClearHistoryTask) {
+        def clearHistory = project.tasks.register('clearHistory', ClearHistoryTask) {
             group = 'Serenity BDD'
             description = "Deletes the Serenity history directory"
 
@@ -81,7 +81,7 @@ class SerenityPlugin implements Plugin<Project> {
             onlyIf { Files.exists(extensionHistoryDirectory) }
         }
 
-        project.tasks.register('history', HistoryTask) {
+        def history = project.tasks.register('history', HistoryTask) {
             group = 'Serenity BDD'
             description = "Records a summary of test outcomes to be used for comparison in the next test run"
 
@@ -94,7 +94,15 @@ class SerenityPlugin implements Plugin<Project> {
             onlyIf { Files.exists(extensionSourceDirectory) }
         }
 
-        project.tasks.named('checkOutcomes').configure {
+        reports.configure {
+            mustRunAfter clearReports
+        }
+
+        aggregate.configure {
+            mustRunAfter clearReports
+        }
+
+        checkOutcomes.configure {
             mustRunAfter aggregate
         }
 
