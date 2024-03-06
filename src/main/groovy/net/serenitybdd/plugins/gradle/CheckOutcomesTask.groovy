@@ -27,7 +27,7 @@ abstract class CheckOutcomesTask extends SerenityAbstractTask {
 
     @TaskAction
     void checkOutcomes() {
-        updateSystemPath()
+        updateLayoutPaths()
         logger.lifecycle("Checking serenity results for ${getProjectKey().get()} in directory $reportDirectory")
         if (Files.exists(reportDirectory)) {
             def checker = new ResultChecker(reportDirectory.toFile())

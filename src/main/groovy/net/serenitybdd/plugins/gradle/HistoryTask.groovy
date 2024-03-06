@@ -29,7 +29,7 @@ abstract class HistoryTask extends SerenityAbstractTask {
 
     @TaskAction
     void history() {
-        updateSystemPath()
+        updateLayoutPaths()
         new FileSystemTestOutcomeSummaryRecorder(historyDirectory,
                 getDeletePreviousHistory().get())
                 .recordOutcomeSummariesFrom(sourceDirectory);

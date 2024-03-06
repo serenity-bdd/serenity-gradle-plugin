@@ -51,7 +51,7 @@ abstract class AggregateTask extends SerenityAbstractTask {
 
     @TaskAction
     void aggregate() {
-        updateSystemPath()
+        updateLayoutPaths()
         def testRoot = getTestRoot().getOrNull()
         logger.lifecycle("Generating Serenity Reports")
 

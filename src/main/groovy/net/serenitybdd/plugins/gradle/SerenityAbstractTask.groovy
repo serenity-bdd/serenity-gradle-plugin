@@ -1,7 +1,6 @@
 package net.serenitybdd.plugins.gradle
 
-import net.serenitybdd.core.di.SerenityInfrastructure
-import net.thucydides.model.configuration.SystemPropertiesConfiguration
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ProjectLayout
 
@@ -22,12 +21,7 @@ class SerenityAbstractTask extends DefaultTask {
         return Paths.get(System.getProperty("user.dir")).resolve(path)
     }
 
-    void updateSystemPath() {
-        def projectBuildDirectory = layout.projectDirectory.asFile.absolutePath
-        System.properties['project.build.directory'] = projectBuildDirectory
-        SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
-        configuration.getEnvironmentVariables().setProperty('project.build.directory', projectBuildDirectory)
-        configuration.reloadOutputDirectory()
+    void updateLayoutPaths() {
+        SerenityPlugin.updateLayoutPaths(layout)
     }
-
 }
