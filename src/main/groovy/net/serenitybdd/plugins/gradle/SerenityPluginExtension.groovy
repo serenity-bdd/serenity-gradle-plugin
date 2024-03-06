@@ -10,7 +10,6 @@ class SerenityPluginExtension {
         def configuration = SerenityInfrastructure.getConfiguration()
         outputDirectory = configuration.getOutputDirectory()
         historyDirectory = configuration.getHistoryDirectory()
-        println("!!!!   " + outputDirectory)
     }
     String outputDirectory
     String historyDirectory

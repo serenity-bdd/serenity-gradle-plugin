@@ -126,7 +126,6 @@ class SerenityPlugin implements Plugin<Project> {
     }
 
     static Path getReportDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
-        System.out.println("!!!!!!!!!! extension.outputDirectory: " + extension.outputDirectory)
         return toAbsolute(new File(extension.outputDirectory), layout)
     }
 

@@ -77,7 +77,6 @@ public class MultiModuleTest {
     @Test
     void multiModulesAggregateTheReportInTheRightLocation() throws IOException {
         var result = runTasks("test", "-i");
-        System.out.println(result.getOutput());
         for (var path : subprojectPaths) {
             Path report = path.resolve("target/site/serenity/index.html");
             assertThat(report).exists();
