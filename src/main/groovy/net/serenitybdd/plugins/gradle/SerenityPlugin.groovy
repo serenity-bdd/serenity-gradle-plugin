@@ -18,10 +18,12 @@ class SerenityPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.pluginManager.apply(JavaPlugin.class)
         def layout = project.layout
+        // tasks.register { ... } is lazy, so `updateReportDirectory` is called again in each closure
         updateReportDirectory(layout)
         def extension = project.extensions.create("serenity", SerenityPluginExtension)
 
         def aggregate = project.tasks.register('aggregate', AggregateTask) {
+            updateReportDirectory(layout)
             group = 'Serenity BDD'
             description = 'Generates aggregated Serenity reports'
 
@@ -39,6 +41,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         project.tasks.register('reports', ReportTask) {
+            updateReportDirectory(layout)
             group = 'Serenity BDD'
             description = 'Generates extended Serenity reports'
 
@@ -49,6 +52,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         def checkOutcomes = project.tasks.register('checkOutcomes', CheckOutcomesTask) {
+            updateReportDirectory(layout)
             group = 'Serenity BDD'
             description = "Checks the Serenity reports and fails the build if there are test failures (run automatically with 'check')"
 
@@ -60,6 +64,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         def clearReports = project.tasks.register('clearReports', ClearReportsTask) {
+            updateReportDirectory(layout)
             group = 'Serenity BDD'
             description = "Deletes the Serenity output directory (run automatically with 'clean')"
 
@@ -71,6 +76,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         project.tasks.register('clearHistory', ClearHistoryTask) {
+            updateReportDirectory(layout)
             group = 'Serenity BDD'
             description = "Deletes the Serenity history directory"
 
@@ -82,6 +88,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         project.tasks.register('history', HistoryTask) {
+            updateReportDirectory(layout)
             group = 'Serenity BDD'
             description = "Records a summary of test outcomes to be used for comparison in the next test run"
 
