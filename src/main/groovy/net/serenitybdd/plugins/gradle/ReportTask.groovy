@@ -38,7 +38,7 @@ abstract class ReportTask extends SerenityAbstractTask {
 
     @TaskAction
     void report() {
-        updateSystemPath()
+        updateLayoutPaths()
         logger.lifecycle("Generating Additional Serenity Reports for ${getProjectKey().get()} to directory $reportDirectory")
         System.properties['serenity.project.key'] = getProjectKey()
         if (getTestRoot().isPresent()) {

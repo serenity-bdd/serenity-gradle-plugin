@@ -1,7 +1,6 @@
 package net.serenitybdd.plugins.gradle
 
 import net.serenitybdd.core.di.SerenityInfrastructure
-import net.serenitybdd.model.di.ModelInfrastructure
 import net.thucydides.model.ThucydidesSystemProperty
 import net.thucydides.model.configuration.SystemPropertiesConfiguration
 import org.gradle.api.Plugin
@@ -18,10 +17,11 @@ class SerenityPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.pluginManager.apply(JavaPlugin.class)
         def layout = project.layout
-        updateReportDirectory(layout)
+        updateLayoutPaths(layout)
         def extension = project.extensions.create("serenity", SerenityPluginExtension)
 
         def aggregate = project.tasks.register('aggregate', AggregateTask) {
+            updateLayoutPaths(layout)
             group = 'Serenity BDD'
             description = 'Generates aggregated Serenity reports'
 
@@ -39,6 +39,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         def reports = project.tasks.register('reports', ReportTask) {
+            updateLayoutPaths(layout)
             group = 'Serenity BDD'
             description = 'Generates extended Serenity reports'
 
@@ -49,6 +50,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         def checkOutcomes = project.tasks.register('checkOutcomes', CheckOutcomesTask) {
+            updateLayoutPaths(layout)
             group = 'Serenity BDD'
             description = "Checks the Serenity reports and fails the build if there are test failures (run automatically with 'check')"
 
@@ -119,16 +121,12 @@ class SerenityPlugin implements Plugin<Project> {
         }
     }
 
-    static void updateReportDirectory(ProjectLayout layout) {
-        // Set the project directory for use in the reporting tasks
-        ModelInfrastructure.configuration.setProjectDirectory(layout.getProjectDirectory().getAsFile().toPath())
-    }
-
     static Path getHistoryDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
         return toAbsolute(new File(extension.historyDirectory), layout)
     }
 
     static Path getReportDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
+        System.out.println("!!!!!!!!!! extension.outputDirectory: " + extension.outputDirectory)
         return toAbsolute(new File(extension.outputDirectory), layout)
     }
 
@@ -149,4 +147,13 @@ class SerenityPlugin implements Plugin<Project> {
         return ThucydidesSystemProperty.DELETE_HISTORY_DIRECTORY.booleanFrom(configuration.environmentVariables, true);
     }
 
+    static void updateLayoutPaths(ProjectLayout layout) {
+        def projectBuildDirectory = layout.projectDirectory.asFile.absolutePath
+        System.properties['project.build.directory'] = projectBuildDirectory
+        SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
+        configuration.getEnvironmentVariables().setProperty('project.build.directory', projectBuildDirectory)
+        configuration.setProjectDirectory(layout.projectDirectory.asFile.toPath())
+        configuration.setOutputDirectory(null)
+        configuration.reloadOutputDirectory()
+    }
 }
