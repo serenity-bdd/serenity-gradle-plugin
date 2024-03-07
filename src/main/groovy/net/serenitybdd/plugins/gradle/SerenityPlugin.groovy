@@ -33,7 +33,6 @@ class SerenityPlugin implements Plugin<Project> {
             issueTrackerUrl = extension.issueTrackerUrl
             jiraUrl = extension.jiraUrl
             jiraProject = extension.jiraProject
-            generateOutcomes = extension.generateOutcomes
 
             outputs.cacheIf( { false })
         }

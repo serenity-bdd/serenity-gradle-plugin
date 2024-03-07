@@ -38,9 +38,6 @@ abstract class AggregateTask extends SerenityAbstractTask {
     @Optional @Input
     abstract Property<String> getJiraProject()
 
-    @Input
-    abstract Property<Boolean> getGenerateOutcomes()
-
     @OutputDirectory
     abstract Path reportDirectory;
 
@@ -85,10 +82,7 @@ abstract class AggregateTask extends SerenityAbstractTask {
         reporter.issueTrackerUrl = getIssueTrackerUrl().getOrNull()
         reporter.jiraUrl = getJiraUrl().getOrNull()
         reporter.jiraProject = getJiraProject().getOrNull()
-
-        if (getGenerateOutcomes().get()) {
-            reporter.setGenerateTestOutcomeReports();
-        }
+        reporter.setGenerateTestOutcomeReports();
         reporter.generateReportsForTestResultsFrom(reporter.outputDirectory)
         new ResultChecker(reporter.outputDirectory).checkTestResults();
     }
