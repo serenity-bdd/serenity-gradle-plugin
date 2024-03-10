@@ -1,94 +1,62 @@
 package net.serenitybdd.plugins.gradle
 
-import net.serenitybdd.core.di.SerenityInfrastructure
+import net.serenitybdd.model.di.ModelInfrastructure
 import net.thucydides.core.reports.html.HtmlAggregateStoryReporter
+import net.serenitybdd.core.di.SerenityInfrastructure
 import net.thucydides.model.configuration.SystemPropertiesConfiguration
 import net.thucydides.model.reports.ResultChecker
-import net.thucydides.model.requirements.DefaultRequirements
-import org.gradle.api.file.ProjectLayout
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
+import net.thucydides.model.requirements.DefaultRequirements;
 import org.gradle.api.tasks.TaskAction
 
-import javax.inject.Inject
 import java.nio.file.Path
 
-abstract class AggregateTask extends SerenityAbstractTask {
-
-    @Input
-    abstract Property<String> getProjectKey()
-
-    @Optional @Input
-    abstract Property<String> getTestRoot()
-
-    @Optional @Input
-    abstract Property<String> getRequirementsBaseDir()
-
-    @Optional @Input
-    abstract Property<String> getRequirementsDir()
-
-    @Optional @Input
-    abstract Property<String> getIssueTrackerUrl()
-
-    @Optional @Input
-    abstract Property<String> getJiraUrl()
-
-    @Optional @Input
-    abstract Property<String> getJiraProject()
-
-    @Input
-    abstract Property<Boolean> getGenerateOutcomes()
-
-    @OutputDirectory
-    abstract Path reportDirectory;
-
-    @Inject
-    AggregateTask(ProjectLayout layout) {
-        super(layout)
-    }
-
+class AggregateTask extends SerenityAbstractTask {
     @TaskAction
     void aggregate() {
-        updateSystemPath()
-        def testRoot = getTestRoot().getOrNull()
-        logger.lifecycle("Generating Serenity Reports")
+        updateProperties(project)
+        Path reportDirectory = SerenityAbstractTask.prepareReportDirectory(project)
 
-        if (testRoot) {
-            logger.lifecycle("  - Test Root: ${testRoot}")
-            System.properties['serenity.test.root'] = testRoot
+        if (!project.serenity.projectKey) {
+            project.serenity.projectKey = project.name
+        }
+        logger.lifecycle("Generating Serenity Reports")
+        String testRoot = project.serenity.testRoot
+
+        if (project.serenity.testRoot) {
+            logger.lifecycle("  - Test Root: ${project.serenity.testRoot}")
+            System.properties['serenity.test.root'] = project.serenity.testRoot
         }
         URI mainReportPath = absolutePathOf(reportDirectory.resolve("index.html")).toUri()
-        def requirementsBaseDir = getRequirementsBaseDir().getOrNull()
         logger.lifecycle("  - Main report: $mainReportPath")
-        logger.lifecycle("      - Test Root: ${testRoot}")
-        logger.lifecycle("      - Requirements base directory: ${requirementsBaseDir}")
+        logger.lifecycle("      - Test Root: ${project.serenity.testRoot}")
+        logger.lifecycle("      - Requirements base directory: ${project.serenity.requirementsBaseDir}")
 
-        System.properties['serenity.project.key'] = getProjectKey()
-        if (requirementsBaseDir) {
-            System.properties['serenity.test.requirements.basedir'] = requirementsBaseDir
+        System.properties['serenity.project.key'] = project.serenity.projectKey
+        if (project.serenity.requirementsBaseDir) {
+            System.properties['serenity.test.requirements.basedir'] = project.serenity.requirementsBaseDir
         }
-        def requirementsDir = getRequirementsDir().getOrNull()
-        if (requirementsDir) {
+        if (project.serenity.requirementsDir) {
 
             SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
-            configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', requirementsDir)
+            configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', project.serenity.requirementsDir)
         }
 
-        def requirements = (testRoot) ? new DefaultRequirements(testRoot) : new DefaultRequirements()
+        def reporter
 
-        def reporter = new HtmlAggregateStoryReporter(getProjectKey().get(), requirements)
+        def requirements = (project.serenity.testRoot) ? new DefaultRequirements(project.serenity.testRoot) : new DefaultRequirements()
+
+        // Set the project directory for use in the reporting tasks
+        ModelInfrastructure.configuration.setProjectDirectory(project.projectDir.toPath())
+
+        reporter = new HtmlAggregateStoryReporter(project.serenity.projectKey, requirements)
         reporter.outputDirectory = reportDirectory.toFile()
-        reporter.testRoot = testRoot
-        reporter.projectDirectory = layout.projectDirectory.asFile.absolutePath
-        reporter.issueTrackerUrl = getIssueTrackerUrl().getOrNull()
-        reporter.jiraUrl = getJiraUrl().getOrNull()
-        reporter.jiraProject = getJiraProject().getOrNull()
+        reporter.testRoot = project.serenity.testRoot
+        reporter.projectDirectory = project.projectDir.absolutePath
+        reporter.issueTrackerUrl = project.serenity.issueTrackerUrl
+        reporter.jiraUrl = project.serenity.jiraUrl
+        reporter.jiraProject = project.serenity.jiraProject
 
-        if (getGenerateOutcomes().get()) {
-            reporter.setGenerateTestOutcomeReports();
-        }
+        reporter.setGenerateTestOutcomeReports();
         reporter.generateReportsForTestResultsFrom(reporter.outputDirectory)
         new ResultChecker(reporter.outputDirectory).checkTestResults();
     }

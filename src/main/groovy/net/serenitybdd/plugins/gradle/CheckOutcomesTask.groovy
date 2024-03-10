@@ -1,35 +1,27 @@
 package net.serenitybdd.plugins.gradle
 
 import net.thucydides.model.reports.ResultChecker
-import org.gradle.api.file.ProjectLayout
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 
-import javax.inject.Inject
-import java.nio.file.Files
 import java.nio.file.Path
 
-abstract class CheckOutcomesTask extends SerenityAbstractTask {
+class CheckOutcomesTask extends SerenityAbstractTask {
+    @InputFiles
+    FileCollection getReportFiles() {
+        Path reportDirectory = SerenityAbstractTask.prepareReportDirectory(project)
 
-    @InputDirectory
-    abstract Path reportDirectory;
-
-    @Input @Optional
-    abstract Property<String> getProjectKey();
-
-    @Inject
-    CheckOutcomesTask(ProjectLayout layout) {
-        super(layout)
+        return project.fileTree(reportDirectory)
     }
 
     @TaskAction
     void checkOutcomes() {
-        updateSystemPath()
-        logger.lifecycle("Checking serenity results for ${getProjectKey().get()} in directory $reportDirectory")
-        if (Files.exists(reportDirectory)) {
+        Path reportDirectory = SerenityAbstractTask.prepareReportDirectory(project)
+
+        SerenityAbstractTask.updateProperties(project)
+        logger.lifecycle("Checking serenity results for ${project.serenity.projectKey} in directory $reportDirectory")
+        if (reportDirectory.toFile().exists()) {
             def checker = new ResultChecker(reportDirectory.toFile())
             checker.checkTestResults()
         }

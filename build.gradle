@@ -43,11 +43,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-compileTestJava {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 //signing {
 //    def signingKey = findProperty("signingKey")
 //    def signingPassword = findProperty("signingPassword")
@@ -108,7 +103,6 @@ test {
     exclude '**/samples/**'
     exclude '**/*Sample*'
     maxParallelForks = Runtime.runtime.availableProcessors() * 4
-    useJUnitPlatform {}
 }
 
 
