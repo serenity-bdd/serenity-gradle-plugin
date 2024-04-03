@@ -1,11 +1,18 @@
 package net.serenitybdd.plugins.gradle
 
-import net.serenitybdd.core.di.SerenityInfrastructure;
+import net.serenitybdd.core.di.SerenityInfrastructure
+import net.thucydides.model.configuration.SystemPropertiesConfiguration
+import net.thucydides.model.webdriver.Configuration;
 
 class SerenityPluginExtension {
-    private final def configuration = SerenityInfrastructure.getConfiguration()
-    String outputDirectory = configuration.getOutputDirectory()
-    String historyDirectory = configuration.getHistoryDirectory()
+    SerenityPluginExtension() {
+        // needs SerenityPlugin.updateLayoutPaths()
+        def configuration = SerenityInfrastructure.getConfiguration()
+        outputDirectory = configuration.getOutputDirectory()
+        historyDirectory = configuration.getHistoryDirectory()
+    }
+    String outputDirectory
+    String historyDirectory
     String projectKey
     String issueTrackerUrl
     String jiraUrl

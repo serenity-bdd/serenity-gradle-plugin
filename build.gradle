@@ -39,8 +39,8 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
 }
 
 //signing {
@@ -95,13 +95,6 @@ wrapper {
 }
 
 test {
-    include '**/When*'
-    include '**/Cucumber*'
-    include '**/ScenarioLineCount*'
-    exclude '**/*$*'
-    exclude '**/integration/**'
-    exclude '**/samples/**'
-    exclude '**/*Sample*'
     maxParallelForks = Runtime.runtime.availableProcessors() * 4
 }
 
@@ -109,7 +102,7 @@ test {
 configurations.all {
     resolutionStrategy {
         // fail fast on dependency convergence problems
-        //failOnVersionConflict()
+        // failOnVersionConflict()
         force "commons-collections:commons-collections:${commonsCollectionsVersion}",
                 "xml-apis:xml-apis:${xmlApiVersion}",
                 "commons-codec:commons-codec:${commonsCodecVersion}",
@@ -124,8 +117,8 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
+    testImplementation("org.assertj:assertj-core:3.25.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
-    testImplementation("org.assertj:assertj-core:${assertjVersion}")
 }
 
 jar {
