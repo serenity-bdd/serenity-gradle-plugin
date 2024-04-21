@@ -12,7 +12,7 @@ import java.nio.file.Path
 
 class SerenityPlugin implements Plugin<Project> {
 
-    private static final Closure<Boolean> TEST_RESULTS = { it.name.matches('.+[.]json') } // [\da-f]{64}
+    private static final Closure<Boolean> TEST_RESULTS = { it.name.matches('.+[.]json') } // [\\da-f]{64}
 
     @Override
     void apply(Project project) {
