@@ -12,6 +12,8 @@ import java.nio.file.Path
 
 class SerenityPlugin implements Plugin<Project> {
 
+    private static final Closure<Boolean> TEST_RESULTS = { it.name.matches('.+[.]json') } // [\da-f]{64}
+
     @Override
     void apply(Project project) {
         project.pluginManager.apply(JavaPlugin.class)
@@ -33,6 +35,7 @@ class SerenityPlugin implements Plugin<Project> {
             jiraUrl = extension.jiraUrl
             jiraProject = extension.jiraProject
             generateOutcomes = extension.generateOutcomes
+            testResults = project.fileTree(reportDirectory).findAll TEST_RESULTS
 
             outputs.cacheIf({ false })
         }
@@ -84,6 +87,7 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         project.tasks.named('test').configure {
+            outputs.files( project.fileTree(getReportDirectory(layout, extension)).findAll TEST_RESULTS)
             finalizedBy aggregate
         }
 
