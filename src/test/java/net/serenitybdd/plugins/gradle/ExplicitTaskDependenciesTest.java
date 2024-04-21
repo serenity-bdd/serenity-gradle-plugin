@@ -9,12 +9,11 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ExplicitTaskDependenciesTest {
+class ExplicitTaskDependenciesTest {
 
     @TempDir(cleanup = CleanupMode.NEVER)
     Path testProjectDir;
@@ -66,7 +65,7 @@ public class ExplicitTaskDependenciesTest {
     @Test
     void explicitDependencyBetweenClearReportsAndCheckOutcomes() {
         var result = runTasks("test", "checkOutcomes", "clearReports", "-i");
-        assertThat(result.getOutput().contains("BUILD SUCCESSFUL"));
+        assertThat(result.getOutput()).contains("BUILD SUCCESSFUL");
     }
 
     private BuildResult runTasks(String... args) {
