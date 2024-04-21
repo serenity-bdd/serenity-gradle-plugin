@@ -14,9 +14,7 @@
  */
 
 plugins {
-    /// XXX - 2022-05-10: id 'com.gradle.plugin-publish' version '1.0.0-rc-1' requires changes
-    // not documented yet. See https://github.com/gradle/gradle/issues/20718
-    id 'com.gradle.plugin-publish' version '0.21.0'
+    id 'com.gradle.plugin-publish' version '1.2.1'
     id 'java-gradle-plugin'
 
     // Building
@@ -50,9 +48,9 @@ java {
 //    sign configurations.archives
 //}
 signing {
-    def signingKeyId = findProperty("signingKeyId")
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
+    def signingKeyId = findProperty("signingKeyId") as String
+    def signingKey = findProperty("signingKey") as String
+    def signingPassword = findProperty("signingPassword") as String
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     sign configurations.archives
 }
@@ -75,31 +73,33 @@ version = nextVersion
 println "BUILDING VERSION ${nextVersion}"
 
 
-task createNewVersionTag(type: Exec) {
+tasks.register('createNewVersionTag', Exec) {
     executable "sh"
     args "-c", "git tag -f -a v$nextVersion -m'release tag'"
 }
 
-task pushVersionTag(type: Exec, dependsOn: 'createNewVersionTag') {
+tasks.register('pushVersionTag', Exec) {
+    dependsOn 'createNewVersionTag'
     executable "sh"
     args "-c", "git push -f origin v$nextVersion"
 }
 
-task tagNewVersion() {
+tasks.register('tagNewVersion') {
     dependsOn pushVersionTag
 }
 
 wrapper {
-    gradleVersion = '7.4.2'
-    distributionType = 'all'
+    gradleVersion = '8.7'
+    distributionType = 'ALL'
 }
 
 test {
     maxParallelForks = Runtime.runtime.availableProcessors() * 4
+    useJUnitPlatform()
 }
 
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy {
         // fail fast on dependency convergence problems
         // failOnVersionConflict()
@@ -138,13 +138,13 @@ jar {
 //    from javadoc.destinationDir
 //}
 
-javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+(javadoc.options as CoreJavadocOptions).addStringOption('Xdoclint:none', '-quiet')
 
 //artifacts {
 //    archives sourcesJar, javadocJar
 //}
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-Xlint:-options"
 }
 
@@ -216,24 +216,16 @@ tasks.withType(JavaCompile) {
 
 
 gradlePlugin {
-    plugins {
-        serenityPlugin {
-            id = 'net.serenity-bdd.serenity-gradle-plugin'
-            implementationClass = 'net.serenitybdd.plugins.gradle.SerenityPlugin'
-        }
-    }
-}
-
-pluginBundle {
     website = 'https://www.serenity-bdd.info/'
     vcsUrl = 'https://github.com/serenity-bdd/serenity-gradle-plugin'
-    description = 'Serenity Gradle Plugin'
-    tags = ['serenity-bdd', 'test-automation']
 
     plugins {
-        serenityPlugin {
-            // id is captured from java-gradle-plugin configuration
+        create('serenityPlugin') {
+            id = 'net.serenity-bdd.serenity-gradle-plugin'
+            implementationClass = 'net.serenitybdd.plugins.gradle.SerenityPlugin'
             displayName = 'Gradle Serenity BDD plugin'
+            description = 'Serenity Gradle Plugin'
+            tags = ['serenity-bdd', 'test-automation']
         }
     }
 }
