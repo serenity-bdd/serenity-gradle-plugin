@@ -18,6 +18,5 @@ class SerenityPluginExtension {
     String requirementsBaseDir
     String requirementsDir
     String testRoot
-    boolean generateOutcomes
     List<String> reports
 }
