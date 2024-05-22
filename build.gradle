@@ -95,6 +95,7 @@ wrapper {
 }
 
 test {
+    useJUnitPlatform()
     maxParallelForks = Runtime.runtime.availableProcessors() * 4
 }
 
