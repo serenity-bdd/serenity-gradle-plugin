@@ -72,30 +72,6 @@ class SerenityPlugin implements Plugin<Project> {
             onlyIf { Files.exists(extensionReportDirectory) }
         }
 
-        def clearHistory = project.tasks.register('clearHistory', ClearHistoryTask) {
-            group = 'Serenity BDD'
-            description = "Deletes the Serenity history directory"
-
-            def extensionHistoryDirectory = getHistoryDirectory(layout, extension)
-
-            historyDirectory = extensionHistoryDirectory
-
-            onlyIf { Files.exists(extensionHistoryDirectory) }
-        }
-
-        def history = project.tasks.register('history', HistoryTask) {
-            group = 'Serenity BDD'
-            description = "Records a summary of test outcomes to be used for comparison in the next test run"
-
-            def extensionSourceDirectory = getSourceDirectory(layout, extension)
-
-            historyDirectory = getHistoryDirectory(layout, extension)
-            sourceDirectory = extensionSourceDirectory
-            deletePreviousHistory = deletePreviousHistory()
-
-            onlyIf { Files.exists(extensionSourceDirectory) }
-        }
-
         reports.configure {
             mustRunAfter clearReports
         }
@@ -119,10 +95,6 @@ class SerenityPlugin implements Plugin<Project> {
         project.tasks.named('check').configure {
             dependsOn checkOutcomes
         }
-    }
-
-    static Path getHistoryDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
-        return toAbsolute(new File(extension.historyDirectory), layout)
     }
 
     static Path getReportDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
