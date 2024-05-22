@@ -8,14 +8,16 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-class MultiModuleTest {
+public class MultiModuleTest {
 
     @TempDir(cleanup = CleanupMode.NEVER)
     Path testProjectDir;
@@ -73,13 +75,13 @@ class MultiModuleTest {
     }
 
     @Test
-    void multiModulesAggregateTheReportInTheRightLocation() {
+    void multiModulesAggregateTheReportInTheRightLocation() throws IOException {
         var result = runTasks("test", "-i");
         for (var path : subprojectPaths) {
             Path report = path.resolve("target/site/serenity/index.html");
             assertThat(report).exists();
         }
-        assertThat(result.getOutput()).contains("BUILD SUCCESSFUL");
+        assertThat(result.getOutput().contains("BUILD SUCCESSFUL"));
     }
 
     private BuildResult runTasks(String... args) {

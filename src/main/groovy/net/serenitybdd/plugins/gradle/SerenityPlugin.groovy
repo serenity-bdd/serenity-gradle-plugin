@@ -1,6 +1,7 @@
 package net.serenitybdd.plugins.gradle
 
 import net.serenitybdd.core.di.SerenityInfrastructure
+import net.thucydides.model.ThucydidesSystemProperty
 import net.thucydides.model.configuration.SystemPropertiesConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -11,8 +12,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class SerenityPlugin implements Plugin<Project> {
-
-    private static final Closure<Boolean> TEST_RESULTS = { it.name.matches('.+[.]json') } // [\\da-f]{64}
 
     @Override
     void apply(Project project) {
@@ -35,9 +34,8 @@ class SerenityPlugin implements Plugin<Project> {
             jiraUrl = extension.jiraUrl
             jiraProject = extension.jiraProject
             generateOutcomes = extension.generateOutcomes
-            testResults = project.fileTree(reportDirectory).findAll TEST_RESULTS
 
-            outputs.cacheIf({ false })
+            outputs.cacheIf( { false })
         }
 
         def reports = project.tasks.register('reports', ReportTask) {
@@ -74,6 +72,30 @@ class SerenityPlugin implements Plugin<Project> {
             onlyIf { Files.exists(extensionReportDirectory) }
         }
 
+        def clearHistory = project.tasks.register('clearHistory', ClearHistoryTask) {
+            group = 'Serenity BDD'
+            description = "Deletes the Serenity history directory"
+
+            def extensionHistoryDirectory = getHistoryDirectory(layout, extension)
+
+            historyDirectory = extensionHistoryDirectory
+
+            onlyIf { Files.exists(extensionHistoryDirectory) }
+        }
+
+        def history = project.tasks.register('history', HistoryTask) {
+            group = 'Serenity BDD'
+            description = "Records a summary of test outcomes to be used for comparison in the next test run"
+
+            def extensionSourceDirectory = getSourceDirectory(layout, extension)
+
+            historyDirectory = getHistoryDirectory(layout, extension)
+            sourceDirectory = extensionSourceDirectory
+            deletePreviousHistory = deletePreviousHistory()
+
+            onlyIf { Files.exists(extensionSourceDirectory) }
+        }
+
         reports.configure {
             mustRunAfter clearReports
         }
@@ -87,7 +109,6 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         project.tasks.named('test').configure {
-            outputs.files( project.fileTree(getReportDirectory(layout, extension)).findAll TEST_RESULTS)
             finalizedBy aggregate
         }
 
@@ -100,7 +121,15 @@ class SerenityPlugin implements Plugin<Project> {
         }
     }
 
+    static Path getHistoryDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
+        return toAbsolute(new File(extension.historyDirectory), layout)
+    }
+
     static Path getReportDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
+        return toAbsolute(new File(extension.outputDirectory), layout)
+    }
+
+    static Path getSourceDirectory(ProjectLayout layout, SerenityPluginExtension extension) {
         return toAbsolute(new File(extension.outputDirectory), layout)
     }
 
@@ -112,10 +141,15 @@ class SerenityPlugin implements Plugin<Project> {
         return path
     }
 
+    static Boolean deletePreviousHistory() {
+        SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
+        return ThucydidesSystemProperty.DELETE_HISTORY_DIRECTORY.booleanFrom(configuration.environmentVariables, true);
+    }
+
     static void updateLayoutPaths(ProjectLayout layout) {
         def projectBuildDirectory = layout.projectDirectory.asFile.absolutePath
         System.properties['project.build.directory'] = projectBuildDirectory
-        SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration() as SystemPropertiesConfiguration
+        SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
         configuration.getEnvironmentVariables().setProperty('project.build.directory', projectBuildDirectory)
         configuration.setProjectDirectory(layout.projectDirectory.asFile.toPath())
         configuration.setOutputDirectory(null)

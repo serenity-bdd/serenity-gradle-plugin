@@ -51,7 +51,7 @@ abstract class ReportTask extends SerenityAbstractTask {
         for (ExtendedReport report : ExtendedReports.named(extendedReportTypes)) {
             report.sourceDirectory = reportDirectory
             report.outputDirectory = reportDirectory
-            URI reportPath = absolutePathOf(report.generateReport()).toUri()
+            URI reportPath = SerenityAbstractTask.absolutePathOf(report.generateReport()).toUri()
             logger.lifecycle("  - ${report.description}: ${reportPath}")
         }
 

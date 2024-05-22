@@ -8,7 +8,6 @@ import net.thucydides.model.requirements.DefaultRequirements
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -33,17 +32,17 @@ abstract class AggregateTask extends SerenityAbstractTask {
     @Optional @Input
     abstract Property<String> getIssueTrackerUrl()
 
-    @InputFiles
-    abstract Collection testResults
-
     @Optional @Input
     abstract Property<String> getJiraUrl()
 
     @Optional @Input
     abstract Property<String> getJiraProject()
 
+    @Input
+    abstract Property<Boolean> getGenerateOutcomes()
+
     @OutputDirectory
-    abstract Path reportDirectory
+    abstract Path reportDirectory;
 
     @Inject
     AggregateTask(ProjectLayout layout) {
@@ -73,7 +72,7 @@ abstract class AggregateTask extends SerenityAbstractTask {
         def requirementsDir = getRequirementsDir().getOrNull()
         if (requirementsDir) {
 
-            SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration() as SystemPropertiesConfiguration
+            SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
             configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', requirementsDir)
         }
 
@@ -86,8 +85,11 @@ abstract class AggregateTask extends SerenityAbstractTask {
         reporter.issueTrackerUrl = getIssueTrackerUrl().getOrNull()
         reporter.jiraUrl = getJiraUrl().getOrNull()
         reporter.jiraProject = getJiraProject().getOrNull()
-        reporter.setGenerateTestOutcomeReports();
+
+        if (getGenerateOutcomes().get()) {
+            reporter.setGenerateTestOutcomeReports();
+        }
         reporter.generateReportsForTestResultsFrom(reporter.outputDirectory)
-        new ResultChecker(reporter.outputDirectory).checkTestResults()
+        new ResultChecker(reporter.outputDirectory).checkTestResults();
     }
 }

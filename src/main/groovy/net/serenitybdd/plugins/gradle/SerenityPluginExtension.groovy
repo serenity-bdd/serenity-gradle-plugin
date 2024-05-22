@@ -9,14 +9,18 @@ class SerenityPluginExtension {
         // needs SerenityPlugin.updateLayoutPaths()
         def configuration = SerenityInfrastructure.getConfiguration()
         outputDirectory = configuration.getOutputDirectory()
+        historyDirectory = configuration.getHistoryDirectory()
     }
     String outputDirectory
+    String historyDirectory
     String projectKey
     String issueTrackerUrl
     String jiraUrl
     String jiraProject
+    String sourceDirectory = outputDirectory
     String requirementsBaseDir
     String requirementsDir
     String testRoot
+    boolean generateOutcomes
     List<String> reports
 }
