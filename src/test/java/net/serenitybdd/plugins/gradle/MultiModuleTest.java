@@ -81,7 +81,7 @@ public class MultiModuleTest {
             Path report = path.resolve("target/site/serenity/index.html");
             assertThat(report).exists();
         }
-        assertThat(result.getOutput().contains("BUILD SUCCESSFUL"));
+        assertThat(result.getOutput()).contains("BUILD SUCCESSFUL");
     }
 
     private BuildResult runTasks(String... args) {

@@ -66,7 +66,7 @@ public class ExplicitTaskDependenciesTest {
     @Test
     void explicitDependencyBetweenClearReportsAndCheckOutcomes() {
         var result = runTasks("test", "checkOutcomes", "clearReports", "-i");
-        assertThat(result.getOutput().contains("BUILD SUCCESSFUL"));
+        assertThat(result.getOutput()).contains("BUILD SUCCESSFUL");
     }
 
     private BuildResult runTasks(String... args) {

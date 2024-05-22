@@ -42,7 +42,7 @@ abstract class AggregateTask extends SerenityAbstractTask {
     abstract Property<Boolean> getGenerateOutcomes()
 
     @OutputDirectory
-    abstract Path reportDirectory;
+    abstract Path reportDirectory
 
     @Inject
     AggregateTask(ProjectLayout layout) {
@@ -72,7 +72,7 @@ abstract class AggregateTask extends SerenityAbstractTask {
         def requirementsDir = getRequirementsDir().getOrNull()
         if (requirementsDir) {
 
-            SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration()
+            SystemPropertiesConfiguration configuration = SerenityInfrastructure.getConfiguration() as SystemPropertiesConfiguration
             configuration.getEnvironmentVariables().setProperty('serenity.requirements.dir', requirementsDir)
         }
 
@@ -87,9 +87,9 @@ abstract class AggregateTask extends SerenityAbstractTask {
         reporter.jiraProject = getJiraProject().getOrNull()
 
         if (getGenerateOutcomes().get()) {
-            reporter.setGenerateTestOutcomeReports();
+            reporter.setGenerateTestOutcomeReports()
         }
         reporter.generateReportsForTestResultsFrom(reporter.outputDirectory)
-        new ResultChecker(reporter.outputDirectory).checkTestResults();
+        new ResultChecker(reporter.outputDirectory).checkTestResults()
     }
 }
