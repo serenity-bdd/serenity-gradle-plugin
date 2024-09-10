@@ -38,10 +38,17 @@ repositories {
     }
 }
 
+// test classes require java 17
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
+// main code can be published with back to java 11 support
+tasks.named("compileGroovy").configure {
+    javaLauncher = javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(11)) }
+}
+
 
 //signing {
 //    def signingKey = findProperty("signingKey")
