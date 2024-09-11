@@ -38,15 +38,17 @@ repositories {
     }
 }
 
-// test classes require java 17
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(11)
     }
 }
-// main code can be published with back to java 11 support
-tasks.named("compileGroovy").configure {
-    javaLauncher = javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(11)) }
+// test classes require java 17
+tasks.named("compileTestJava", JavaCompile) {
+    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) }
+}
+tasks.withType(Test) {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
 }
 
 
