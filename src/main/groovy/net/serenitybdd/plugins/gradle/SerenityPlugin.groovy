@@ -35,6 +35,7 @@ class SerenityPlugin implements Plugin<Project> {
             jiraProject = extension.jiraProject
             generateOutcomes = extension.generateOutcomes
 
+            outputs.dir(reportDirectory)
             outputs.cacheIf( { false })
         }
 
@@ -85,7 +86,8 @@ class SerenityPlugin implements Plugin<Project> {
         }
 
         project.tasks.named('test').configure {
-            finalizedBy aggregate
+            // Intentionally removed automatic report aggregation after tests
+            // finalizedBy aggregate
         }
 
         project.tasks.named('clean').configure {
