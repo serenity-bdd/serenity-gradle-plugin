@@ -35,7 +35,7 @@ public class ExplicitTaskDependenciesTest {
                 useJUnitPlatform {}
             }
             ext {
-                serenityCoreVersion = '4.0.46'
+                serenityCoreVersion = '4.2.22'
                 junitVersion = '5.10.+'
             }
                     

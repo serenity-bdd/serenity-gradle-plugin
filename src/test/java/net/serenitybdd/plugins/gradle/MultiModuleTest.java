@@ -36,27 +36,60 @@ public class MultiModuleTest {
         for (var s : subprojectNames) {
             Files.createDirectories(testProjectDir.resolve(s).resolve("src/test/java"));
             Files.writeString(testProjectDir.resolve(s).resolve("build.gradle"), """
-                        plugins {
-                            id 'java'
-                            id 'net.serenity-bdd.serenity-gradle-plugin'
-                        }
-                        repositories {
-                            mavenCentral()
-                        }
-                        test {
-                            useJUnitPlatform {}
-                        }
-                        ext {
-                            serenityCoreVersion = '4.0.46'
-                            junitVersion = '5.10.+'
-                        }
-                                
-                        dependencies {
-                            testImplementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}",
-                                    "net.serenity-bdd:serenity-junit5:${serenityCoreVersion}",
-                                    "org.junit.jupiter:junit-jupiter-api:${junitVersion}",
-                                    "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
-                        }
+                    plugins {
+                                                 id "net.serenity-bdd.serenity-gradle-plugin"
+                                                 id 'java'
+                                             }
+                    
+                                             defaultTasks 'clean', 'test', 'aggregate'
+                    
+                                             repositories {
+                                                 mavenCentral()
+                                             }
+                    
+                                             sourceCompatibility = 17
+                                             targetCompatibility = 17
+                    
+                                             ext {
+                                                 slf4jVersion = '1.7.7'
+                                                 serenityCoreVersion = '4.2.22'
+                                                 junitVersion = '5.11.4'
+                                                 assertJVersion = '3.23.1'
+                                                 lombokVersion = '1.18.24'
+                                                 logbackVersion = '1.2.11'
+                                             }
+                    
+                                             dependencies {
+                                                 testImplementation "net.serenity-bdd:serenity-core:${serenityCoreVersion}",
+                                                         "net.serenity-bdd:serenity-junit5:${serenityCoreVersion}",
+                                                         "net.serenity-bdd:serenity-screenplay:${serenityCoreVersion}",
+                                                         "net.serenity-bdd:serenity-screenplay-webdriver:${serenityCoreVersion}",
+                                                         "net.serenity-bdd:serenity-ensure:${serenityCoreVersion}",
+                                                         "net.serenity-bdd:serenity-junit:${serenityCoreVersion}",
+                                                         "org.junit.jupiter:junit-jupiter-api:${junitVersion}",
+                                                         "org.junit.jupiter:junit-jupiter-engine:${junitVersion}",
+                                                         "org.assertj:assertj-core:${assertJVersion}",
+                                                         "org.projectlombok:lombok:${lombokVersion}",
+                                                         "ch.qos.logback:logback-classic:${logbackVersion}"
+                                             }
+                    
+                                             test {
+                                                 useJUnitPlatform()
+                                                 testLogging.showStandardStreams = true
+                                                 systemProperties System.getProperties()
+                                             }
+                    
+                                             gradle.startParameter.continueOnFailure = true
+                    
+                                             serenity {
+                                                 reports = ["single-page-html"]
+                    
+                                                 // // Specify the root package of any JUnit acceptance tests
+                                                 testRoot="starter"
+                                             }
+                    
+                                             test.finalizedBy(aggregate)
+                    
                     """);
             Files.writeString(testProjectDir.resolve(s).resolve("src/test/java/NoopTest.java"), """
                         import org.junit.jupiter.api.Test;
